@@ -1,65 +1,33 @@
-#include <stdlib.h>
-#include <stdio.h>
-int j;
-int func1(int a, int *b, int *c) {
-        int i=0;
-        j=a++;
-        int *d = b;
-        b = c;
-        c = d;
-        while(i!=j){
-                *(b+i) = *(c+i) + i; //unsafe op
-                i++;
-        }
-        return i;
+int foo(int var_a){
+    return var_a;
 }
-
-int func2(int a, int *b, int **c) {
-        if(a==0)
-                a += 1;
-        else
-                *c = b;
-        return a;
+int indirect_version(int (*fn)(int)){
+    int var_i, var_b = 0;
+    for(var_i = 0; var_i < 3; ++var_i){
+        var_b = fn(var_b);
+    }
+    return (var_b + var_i + 7);
 }
-
-int main() {
-        int a = 1, b, c;
-        int s[10] = {1};
-        int *p = malloc(20*sizeof(10));
-        int **q = &p+1;
-        b = a++;
-        c = s[0] + a + (++b);
-        **q = s[0];
-        s[1] = *(*q+c);
-
-        j = func1(c, s, p); //s, p will not be modified by func1
-
-        for(int i = 0; i<c; i++)
-                s[i] = *(p+i); //unsafe op
-
-        *(*q+a) = func2(b, s, q); //q will not change, but *q will change
-
-        return b;
+char* swap(char **p, char **q){
+  char* t = *p;
+  *p = *q;
+  *q = t;
+  return t;
 }
-
-
-
-
-
-//b = a++;
-        //c = s[0] + a + (++b);
-        //**q = s[0];
-        //s[1] =*(*q+a);
-        //s[1] =*(*(q+b+*x)+a);
-        //s[1] = **q + *x + a;
-        //c = s[0] + a + (++b);
-        //a = s[1];
-        //j = func1(c, s, p) + a; //s, p will not be modified by func1
-        //a = b+c;
-        //for(int i = 0; i<c; i++)
-        //        s[i] = *(p+i); //unsafe op
-        //*(p+=2) = 2;*(*q+a)
-        //*(*(b+q)+*p+a+c)
-        //*p = a;
-        //*(*q+a) = func2(b, s, q); //q will not change, but *q will change
-        //*(a+*(q+b))
+char* swap1(char **p, char **q){
+  return *p;
+}
+char ppp;
+int main(){
+  char a1, b1;
+  char *a = &a1;
+  char *b = &b1;
+  char *c = swap(&a,&b);
+  char **x = &a;
+  char* (*func)(char **p, char **q);
+  func = swap;
+  char *d = (*func)(&a, &b);
+  func = swap1;
+  **x = b1;
+  return indirect_version(&foo);
+}
